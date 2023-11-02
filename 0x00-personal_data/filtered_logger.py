@@ -96,3 +96,10 @@ def get_db():
         return None
 
 if __name__ == "__main__":
+    # Example usage of the get_db function
+    db = get_db()
+    if db:
+        print("Successfully connected to the database.")
+        # You can now perform database operations using the 'db' connection.
+        # Don't forget to close the connection when you're done.
+        db.close()
