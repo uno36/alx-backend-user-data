@@ -71,35 +71,28 @@ def get_logger() -> logging.Logger:
     return logger
 
 
-def get_db() -> mysql.connector.connection.MySQLConnection:
-    """
-    """
-    user = os.getenv('PERSONAL_DATA_DB_USERNAME') or "root"
-    passwd = os.getenv('PERSONAL_DATA_DB_PASSWORD') or ""
-    host = os.getenv('PERSONAL_DATA_DB_HOST') or "localhost"
-    db_name = os.getenv('PERSONAL_DATA_DB_NAME')
-    conn = mysql.connector.connect(user=user,
-                                   password=passwd,
-                                   host=host,
-                                   database=db_name)
-    return conn
+def get_db():
+    # Retrieve database credentials from environment variables
+    db_username = os.environ.get("PERSONAL_DATA_DB_USERNAME", "root")
+    db_password = os.environ.get("PERSONAL_DATA_DB_PASSWORD", "")
+    db_host = os.environ.get("PERSONAL_DATA_DB_HOST", "localhost")
+    db_name = os.environ.get("PERSONAL_DATA_DB_NAME")
 
+    # Check if the required environment variable (db_name) is set
+    if db_name is None:
+        raise ValueError("Environment variable PERSONAL_DATA_DB_NAME is not set.")
 
-def main():
-    """
-    main entry point
-    """
-    db = get_db()
-    logger = get_logger()
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM users;")
-    fields = cursor.column_names
-    for row in cursor:
-        message = "".join("{}={}; ".format(k, v) for k, v in zip(fields, row))
-        logger.info(message.strip())
-    cursor.close()
-    db.close()
-
+    # Create a database connection
+    try:
+        db_connection = mysql.connector.connect(
+            user=db_username,
+            password=db_password,
+            host=db_host,
+            database=db_name
+        )
+        return db_connection
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
 
 if __name__ == "__main__":
-    main()
